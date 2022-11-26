@@ -12,6 +12,11 @@ namespace Services
         private readonly HashSet<IServiceItem> services;
 
         /// <summary>
+        /// Dependency injection rules for this collection. If collection violate it that will throwed exception.
+        /// </summary>
+        public IDependencyInjectionRules? DependencyInjectionRules { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ServiceCollection"/> class.
         /// </summary>
         public ServiceCollection()
@@ -101,7 +106,15 @@ namespace Services
                 }
             }
 
-            
+            if (DependencyInjectionRules == null)
+            {
+                DependencyInjectionRules = new DefaultDependencyInjectionRules();
+            }
+
+            if (!DependencyInjectionRules.ControllerMapIsCorrect(controllerMap))
+            {
+                throw new InvalidOperationException($"Recursive dependency is infinite or more than {DependencyInjectionRules.MaxDependencyInjectionDepth}!");
+            }
         }
 
 
